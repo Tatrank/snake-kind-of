@@ -1,0 +1,11 @@
+#lol {
+  height: 60px;
+  width: 60px;
+  background: rgb(79, 197, 201);
+}
+
+canvas {
+  border: 2px solid;
+  width: 400;
+  height: 400;
+}
