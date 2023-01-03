@@ -1,114 +1,142 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+let snake_barva = "rgb(204, 255, 153)";
+let background = "white";
+let food = "red";
 ctx.fillStyle = "blue";
-let osa_x = 0;
+let m;
 let osa_y = 0;
-ctx.fillRect(osa_x, 0, 80, 40);
+let unit = 25;
+let osa_x = unit;
 let height = canvas.height;
 let width = canvas.width;
-let d = setInterval(run_right, 100);
-let pohyb_vlevo_vpravo = 0;
-let pohyb_nahoru_dolu = 0;
+let snake = [
+  { x: unit * 3, y: 0 },
+  { x: unit * 2, y: 0 },
+  { x: unit * 1, y: 0 },
+  { x: 0, y: 0 },
+  { x: -unit, y: 0 },
+];
+let left = 37;
+let right = 39;
+let up = 38;
+let down = 40;
+let food_x;
+let food_y;
+let reset_bool = false;
+let score = 0;
+let kolize = false;
 
 //listening to pressed keywords
 
-document.addEventListener("keydown", checkKey);
-function checkKey() {
-  e = window.event;
-  ctx.fillStyle = "blue";
-  if (e.keyCode == "38" && pohyb_nahoru_dolu == 0) {
-    ctx.clearRect(osa_x, osa_y, 80, 40);
-    console.log("up");
-    clearInterval(d);
-    d = setInterval(run_up, 100);
-    pohyb_nahoru_dolu = 1;
-    pohyb_vlevo_vpravo = 0;
-  } else if (e.keyCode == "40" && pohyb_nahoru_dolu == 0) {
-    ctx.clearRect(osa_x, osa_y, 80, 40);
-    console.log("down");
-    clearInterval(d);
-    d = setInterval(run_down, 100);
-    pohyb_nahoru_dolu = 1;
-    pohyb_vlevo_vpravo = 0;
-  } else if (e.keyCode == "37" && pohyb_vlevo_vpravo == 0) {
-    ctx.clearRect(osa_x, osa_y, 40, 80);
-    console.log("left");
-    clearInterval(d);
-    d = setInterval(run_left, 100);
-    pohyb_nahoru_dolu = 0;
-    pohyb_vlevo_vpravo = 1;
-  } else if (e.keyCode == "39" && pohyb_vlevo_vpravo == 0) {
-    ctx.clearRect(osa_x, osa_y, 40, 80);
-    console.log("right");
-    clearInterval(d);
-    d = setInterval(run_right, 100);
-    pohyb_nahoru_dolu = 0;
-    pohyb_vlevo_vpravo = 1;
-  }
+window.addEventListener("keydown", pressed_key);
+
+// declaration of function to draw snake
+
+function draw_snake() {
+  ctx.fillStyle = snake_barva;
+  snake.forEach((element) => {
+    ctx.fillRect(element.x, element.y, unit, unit);
+  });
+  move();
 }
 
 // declaration of function to move snake
-
-function run_right() {
-  ctx.clearRect(osa_x, osa_y, 80, 40);
-  osa_x += 20;
-  if (osa_x != width - 60) {
-    ctx.fillRect(osa_x, osa_y, 80, 40);
+function move() {
+  if (!reset_bool) {
+    m = {
+      x: snake[0].x + osa_x,
+      y: snake[0].y + osa_y,
+    };
+    for (let i = 0; i < snake.length; i++) {
+      if (snake[i].x == m.x && snake[i].y == m.y) {
+        kolize = true;
+        break;
+      }
+    }
+    if (m.x == width || m.y == height || m.x == -25 || m.y == -25 || kolize) {
+      reset_bool = true;
+      kolize = false;
+    }
+    snake.unshift(m);
+    ctx.fillStyle = background;
+    if (snake[0].x == food_x && snake[0].y == food_y) {
+      score += 1;
+      document.getElementById("score").innerHTML = score;
+    } else {
+      ctx.fillRect(
+        snake[snake.length - 1].x,
+        snake[snake.length - 1].y,
+        unit,
+        unit
+      );
+      snake.pop();
+    }
   } else {
+    reset(width, height);
+  }
+}
+
+function pressed_key(window) {
+  let goingUP = osa_y == -unit;
+  let goingDown = osa_y == unit;
+  let goingleft = osa_x == -unit;
+  let goingRight = osa_x == unit;
+  if (window.keyCode == down && !goingUP) {
+    osa_y = unit;
     osa_x = 0;
-    ctx.fillRect(osa_x, osa_y, 80, 40);
+    console.log("jsem tady");
+    return;
   }
-}
-
-function run_left() {
-  ctx.clearRect(osa_x, osa_y, 80, 40);
-  osa_x -= 20;
-  if (osa_x != -40) {
-    ctx.fillRect(osa_x, osa_y, 80, 40);
-  } else {
-    osa_x = 340;
-    ctx.fillRect(osa_x, osa_y, 80, 40);
-  }
-}
-
-function run_down() {
-  ctx.clearRect(osa_x, osa_y, 40, 80);
-  osa_y += 20;
-  if (osa_y != height - 60) {
-    ctx.fillRect(osa_x, osa_y, 40, 80);
-  } else {
+  if (window.keyCode == left && !goingRight) {
     osa_y = 0;
-    ctx.fillRect(osa_x, osa_y, 40, 80);
+    osa_x = -unit;
+    console.log("jsem tady");
+    return;
+  }
+
+  if (window.keyCode == right && !goingleft) {
+    osa_y = 0;
+    osa_x = unit;
+    console.log("jsem tady");
+    return;
+  }
+  if (window.keyCode == up && !goingDown) {
+    osa_y = -unit;
+    osa_x = 0;
+    console.log("jsem tady");
+    return;
   }
 }
 
-function run_up() {
-  ctx.clearRect(osa_x, osa_y, 40, 80);
-  osa_y -= 20;
-  if (osa_y != -20) {
-    ctx.fillRect(osa_x, osa_y, 40, 80);
-  } else {
-    osa_y = 400;
-    ctx.fillRect(osa_x, osa_y, 40, 80);
+function generate_food() {
+  function location(max, min) {
+    let i = Math.round((Math.random() * (max - min) + min) / unit) * unit;
+    return i;
   }
+  food_x = location(width - unit, 0);
+  food_y = location(height - unit, 0);
+  ctx.fillStyle = food;
+  ctx.fillRect(food_x, food_y, unit, unit);
 }
 
-// array to spawn food for snake in right position
-let food_y;
-let food_x;
-let numbers = [];
-let temp = 0;
-for (let i = 0; i < 10; i++) {
-  numbers[i] = temp;
-  temp += 40;
+function reset(width, height) {
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, width, height);
+  reset_bool = false;
+  snake = [
+    { x: unit * 3, y: 0 },
+    { x: unit * 2, y: 0 },
+    { x: unit * 1, y: 0 },
+    { x: 0, y: 0 },
+    { x: -unit, y: 0 },
+  ];
+  osa_x = unit;
+  osa_y = 0;
+  score = 0;
+  document.getElementById("score").innerHTML = score;
 }
 
-function food() {
-  ctx.fillStyle = "red";
-  food_x = numbers[Math.floor(Math.random() * (10 - 0) + 0)];
-  food_y = numbers[Math.floor(Math.random() * (10 - 0) + 0)];
-  ctx.fillRect(food_x, food_y, 40, 40);
-  ctx.fillStyle = "blue";
-}
+setInterval(draw_snake, 75);
+setInterval(generate_food, 5000);
 
-setInterval(food, 500);
